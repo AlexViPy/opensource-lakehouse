@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "delta-lake"
+version = "0.1.0"
+description = ""
+authors = ["A.Vitkoskiy <av74r@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10.3"
+dbt = "^1.9.1"
+pyspark = {extras = ["connect"], version = "^3.5.3"}
+delta-spark = "^3.1.0"
+dbt-spark = {extras = ["pyhive"], version = "^1.9"}
+pyspark-pandas = "^0.0.7"
+pyarrow = "^18.1.0"
+grpcio = "^1.68.1"
+grpcio-status = "^1.68.1"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8.3"
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

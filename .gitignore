@@ -1,0 +1,10 @@
+.env
+.venv
+.hive-metastore
+.spark-warehouse
+.minio-data
+spark-warehouse
+data
+.DS_Store
+.ipynb_checkpoints
+*.ipynb
