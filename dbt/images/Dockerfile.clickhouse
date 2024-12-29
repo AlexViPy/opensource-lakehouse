@@ -1,5 +1,6 @@
 ARG build_for=linux/amd64
-FROM --platform=$build_for python:3.10.3-slim-bullseye as base
+ARG dbt_spark_pkg=1.8.6
+FROM --platform=$build_for python:3.10.7-slim-bullseye as base
 
 RUN apt-get update \
   && apt-get dist-upgrade -y \
@@ -20,15 +21,13 @@ RUN apt-get update \
 ENV PYTHONIOENCODING=utf-8
 ENV LANG=C.UTF-8
 
-RUN python -m pip install --upgrade pip setuptools wheel poetry --no-cache-dir
-COPY ["poetry.lock", "pyproject.toml", "./"]
-RUN poetry lock
-RUN poetry install 
+RUN python -m pip install --upgrade pip setuptools wheel --no-cache-dir
 
 # Set docker basics
 WORKDIR /usr/app/dbt/
 COPY ["profiles.yml", "dbt_project.yml", "packages.yml", "./"]
+RUN pip install dbt-clickhouse==$dbt_spark_pkg --no-cache-dir
 
-FROM base as dbt-spark
+FROM base as dbt-greenplum
 RUN dbt debug --config-dir && dbt deps
-CMD ["poetry", "run"]
+CMD ["sleep", "infinity"]

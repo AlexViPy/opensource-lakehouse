@@ -21,16 +21,17 @@ x-airflow-common:
     # custom modifications
     AIRFLOW_DAGS_LOCAL_PATH: ${AIRFLOW_DAGS_LOCAL_PATH}
     CLICKHOUSE_BACKEND_URI: http://clickhouse:8123/default
-    DBT_USER: ${DBT_USER}
-    DBT_PWD: ${DBT_PWD}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
     - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
+    - ${AIRFLOW_PROJ_DIR:-.}/jars:/opt/airflow/jars
     - /var/run/docker.sock:/var/run/docker.sock
   user: "${AIRFLOW_UID:-50000}:0"
+  networks:
+    - likehouse_network
   depends_on:
     &airflow-common-depends-on
     postgres:
@@ -52,6 +53,8 @@ services:
       retries: 5
       start_period: 5s
     restart: always
+    networks:
+      - likehouse_network
 
   airflow-webserver:
     <<: *airflow-common
@@ -175,75 +178,6 @@ services:
     command:
       - bash
       - /clean-logs
-
-  spark-thrift:
-    build: ./spark/thrift
-    ports:
-      - "10000:10000"
-      - "4040:4040"
-    depends_on:
-      - spark-hive-metastore
-    command: >
-      --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2
-      --name Thrift JDBC/ODBC Server
-      --hiveconf hive.server2.thrift.bind.host=0.0.0.0
-    volumes:
-      - ./.spark-warehouse/:/spark-warehouse/
-      - ./spark/thrift/hive-site.xml:/usr/spark/conf/hive-site.xml
-      - ./spark/thrift/spark-defaults.conf:/usr/spark/conf/spark-defaults.conf
-      - ./data:/data
-    environment:
-      - WAIT_FOR=spark-hive-metastore:5432
-
-  spark-hive-metastore:
-    image: postgres:9-alpine
-    volumes:
-      - ./spark/.hive-metastore/:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=dbt
-      - POSTGRES_PASSWORD=dbt
-      - POSTGRES_DB=metastore
-
-  minio:
-    image: 'minio/minio:latest'
-    hostname: minio
-    container_name: minio
-    ports:
-      - '9000:9000'
-      - '9001:9001'
-    volumes:
-      - ./minio-data:/data
-    environment:
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
-      MINIO_API_SELECT_PARQUET: "on"
-    command: server --console-address ":9001" /data
-
-  createbuckets:
-    image: minio/mc
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
-      /usr/bin/mc mb myminio/warehouse;
-      /usr/bin/mc policy download myminio/warehouse;
-      exit 0;
-      "
-  
-  clickhouse:
-    image: bitnami/clickhouse:23.4.2-debian-11-r7
-    container_name: clickhouse
-    ports:
-     - "8123:8123"
-     - "9009:9009"
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
-    ulimits:
-      nproc: 65535
-      nofile:
-        soft: 262144
-        hard: 262144
   
   docker-socket-proxy:
     image: tecnativa/docker-socket-proxy:latest
@@ -256,3 +190,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: always
+    networks:
+      - likehouse_network
+
+networks:
+  likehouse_network:
+    external: true
