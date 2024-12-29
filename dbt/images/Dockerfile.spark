@@ -1,6 +1,7 @@
-ARG build_for=linux/amd64
-ARG dbt_spark_pkg=1.9.0
-FROM --platform=$build_for python:3.10.7-slim-bullseye as base
+ARG BUILD_FOR=linux/amd64
+ARG DBT_CONNECTOR=dbt-spark
+ARG DBT_PKG=1.9.0
+FROM --platform=$BUILD_FOR python:3.10.7-slim-bullseye as base
 
 RUN apt-get update \
   && apt-get dist-upgrade -y \
@@ -26,8 +27,8 @@ RUN python -m pip install --upgrade pip setuptools wheel --no-cache-dir
 # Set docker basics
 WORKDIR /usr/app/dbt/
 COPY ["profiles.yml", "dbt_project.yml", "packages.yml", "./"]
-RUN pip install dbt-spark==$dbt_spark_pkg --no-cache-dir
+RUN pip install $DBT_CONNECTOR==$DBT_PKG --no-cache-dir
 
-FROM base as dbt-greenplum
+FROM base as dbt-spark
 RUN dbt debug --config-dir && dbt deps
 CMD ["sleep", "infinity"]
