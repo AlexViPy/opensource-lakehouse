@@ -1,13 +1,14 @@
 dbtSpark:
-  target: local
+  target: dev
   outputs:
-    local:
-      type: spark
+    dev:
+      host: spark-thrift-server
       method: thrift
-      host: 127.0.0.1
       port: 10000
       user: root
-      schema: ast
+      schema: dev
+      threads: 6
+      type: spark
       connect_retries: 5
       connect_timeout: 60
       retry_all: true
