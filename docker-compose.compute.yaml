@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   mariadb:
-    image: mariadb:10.11.2
+    image: mariadb:10.11.10
     container_name: mariadb
     hostname: hive-metastore-db
     volumes:
