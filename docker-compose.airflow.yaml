@@ -7,13 +7,9 @@ x-airflow-common:
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
-    AIRFLOW__CORE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
-    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
-    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
     AIRFLOW__CORE__DEFAULT_TIMEZONE: 'Europe/Moscow'
     AIRFLOW__CORE__KILLED_TASK_CLEANUP_TIME: 604800
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
@@ -21,13 +17,19 @@ x-airflow-common:
     # custom modifications
     AIRFLOW_DAGS_LOCAL_PATH: ${AIRFLOW_DAGS_LOCAL_PATH}
     CLICKHOUSE_BACKEND_URI: http://clickhouse:8123/default
+    SPARK_CONF_DIR: /opt/airflow/jars/conf
+    HADOOP_CONF_DIR: /opt/airflow/jars/conf
+    HIVE_HOME: /opt/airflow/jars
+  env_file:
+    - .env
   volumes:
-    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
-    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
-    - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
-    - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
-    - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
-    - ${AIRFLOW_PROJ_DIR:-.}/jars:/opt/airflow/jars
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/config:/opt/airflow/config
+    - ./airflow/plugins:/opt/airflow/plugins
+    - ./airflow/data:/opt/airflow/data
+    - ./airflow/spark-apps:/opt/airflow/spark-apps
+    - ./spark/jars:/opt/airflow/jars
     - /var/run/docker.sock:/var/run/docker.sock
   user: "${AIRFLOW_UID:-50000}:0"
   networks:
@@ -42,11 +44,9 @@ services:
     image: postgres:13
     container_name: airflow_postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER_PWD_DB}
-      POSTGRES_PASSWORD: ${POSTGRES_USER_PWD_DB}
-      POSTGRES_DB: ${POSTGRES_USER_PWD_DB}
-    volumes:
-      - postgres-db-volume:/var/lib/postgresql/data
+      POSTGRES_USER: ${POSTGRES_USER_PWD_DB:-airflow}
+      POSTGRES_PASSWORD: ${POSTGRES_USER_PWD_DB:-airflow}
+      POSTGRES_DB: ${POSTGRES_USER_PWD_DB:-airflow}
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s

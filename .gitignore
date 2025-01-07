@@ -5,6 +5,8 @@
 .minio-data
 spark-warehouse
 data
+logs
 .DS_Store
 .ipynb_checkpoints
 *.ipynb
+__pycache__
