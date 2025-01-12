@@ -1,0 +1,2 @@
+pyspark==3.3.2
+pyiceberg==0.2.1

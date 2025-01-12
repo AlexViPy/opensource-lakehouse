@@ -87,6 +87,20 @@ services:
       - spark-master
     networks:
       - likehouse_network
+  
+  pyspark-jupyter-notebook:
+    build:
+      context: ./jupyter
+    container_name: pyspark-jupyter-notebook
+    env_file:
+      - .env
+    volumes:
+      - ./jupyter/work:/home/jovyan/work
+    ports:
+      - 10001:8888
+    restart: always 
+    networks:
+      - likehouse_network
 
 networks:
   likehouse_network:

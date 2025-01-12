@@ -57,4 +57,9 @@
         <name>fs.s3a.connection.ssl.enabled</name>
         <value>false</value>
     </property>
+
+    <property>
+        <name>datanucleus.schema.autoCreateTables</name>
+        <value>true</value>
+    </property>
 </configuration>

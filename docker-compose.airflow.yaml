@@ -28,7 +28,7 @@ x-airflow-common:
     - ./airflow/config:/opt/airflow/config
     - ./airflow/plugins:/opt/airflow/plugins
     - ./airflow/data:/opt/airflow/data
-    - ./airflow/spark-apps:/opt/airflow/spark-apps
+    - ./airflow/spark-jobs:/opt/airflow/spark-jobs
     - ./spark/jars:/opt/airflow/jars
     - /var/run/docker.sock:/var/run/docker.sock
   user: "${AIRFLOW_UID:-50000}:0"

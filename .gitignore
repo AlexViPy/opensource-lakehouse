@@ -3,10 +3,10 @@
 .hive-metastore
 .spark-warehouse
 .minio-data
+.jars
 spark-warehouse
 data
 logs
 .DS_Store
 .ipynb_checkpoints
-*.ipynb
 __pycache__
