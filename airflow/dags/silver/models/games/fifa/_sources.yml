@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: fifa_wc
+    schema: bronze
+    tables:
+      - name: fifa

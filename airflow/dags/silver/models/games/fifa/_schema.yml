@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: s_minio_games_fifa
+    config:
+      schema: "silver"
+      materialized: "table"
+      file_format: "iceberg"
+      tags: ["fifa", "s_minio_games_fifa"]

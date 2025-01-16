@@ -10,3 +10,7 @@ logs
 .DS_Store
 .ipynb_checkpoints
 __pycache__
+/airflow/dags/silver/logs
+/airflow/dags/silver/target
+/airflow/dags/silver/.user.yml
+/airflow/dags/silver/dbt_packages

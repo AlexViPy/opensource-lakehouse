@@ -1,0 +1,10 @@
+dbtSpark:
+  target: dev
+  outputs:
+    dev:
+      type: spark
+      method: session
+      schema: spark_catalog
+      host: kyuubi
+      port: 10009
+      threads: 2

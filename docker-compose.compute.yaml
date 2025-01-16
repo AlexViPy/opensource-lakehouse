@@ -32,26 +32,18 @@ services:
     networks:
       - likehouse_network
 
-  spark-thrift-server:
-    build:
-      context: ./spark
-    container_name: spark-thrift-server
-    restart: always
-    ports:
-      - 10000:10000
-      - 4040:4040
-    command: sh -c "
-      sleep 10 && ./sbin/start-thriftserver.sh --driver-java-options '-Dhive.metastore.uris=thrift://hive-metastore:9083' --master spark://spark-master:7077      --executor-memory 4G --total-executor-cores 4 --driver-memory 4G"
+  kyuubi:
+    hostname: kyuubi
+    container_name: kyuubi
+    image: apache/kyuubi:1.7.0-spark
     volumes:
-      - ./spark/hive-site.xml:/usr/spark/conf/hive-site.xml
-      - ./spark/spark-defaults.conf:/usr/spark/conf/spark-defaults.conf
-    env_file:
-      - .env
-    environment:
-      - WAIT_FOR=hive-metastore-db:5432
+      - ./kyuubi/kyuubi-defaults.conf:/opt/kyuubi/conf/kyuubi-defaults.conf
+    ports:
+      - 10009:10009
+      - 10099:10099
+    restart: always
     depends_on:
-      - hive-metastore-db
-      - hive-metastore
+      - spark-master
     networks:
       - likehouse_network
 
@@ -99,6 +91,17 @@ services:
     ports:
       - 10001:8888
     restart: always 
+    networks:
+      - likehouse_network
+  
+  dbt-spark:
+    build:
+      context: ./airflow/dags/silver
+    container_name: dbt-spark
+    env_file:
+      - .env
+    volumes:
+      - ./airflow/dags/silver:/usr/app/dbt
     networks:
       - likehouse_network
 
